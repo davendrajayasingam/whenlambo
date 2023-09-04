@@ -8,6 +8,10 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      colors: {
+        bitcoin: '#f7931a',
+        ethereum: '#627eea'
+      }
     }
   },
   plugins: []

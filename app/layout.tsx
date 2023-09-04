@@ -59,9 +59,11 @@ export default function RootLayout({ children }: Props)
     >
       <head />
       <body className='font-sans h-full'>
-        <Header />
-        {children}
-        <Footer />
+        <div className='flex flex-col justify-between h-full'>
+          <Header />
+          {children}
+          <Footer />
+        </div>
         <Analytics />
         <Toaster />
       </body>
