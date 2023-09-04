@@ -2,6 +2,7 @@
 
 import usePriceFetcher from '@/utils/components/usePriceFetcher'
 import { classNames } from '@/utils/helpers/tailwindHelper'
+import Countdown from 'react-countdown'
 
 export default function CurrencyPage({ params }: { params: { currencyId: string } }) 
 {
@@ -50,6 +51,24 @@ export default function CurrencyPage({ params }: { params: { currencyId: string 
     <p className='font-semibold text-2xl text-white/80 text-center'>
       Trade your USDT for {`${currencyId}`.toUpperCase()}!
     </p>
+
+    {
+      (nextRefresh as number) > 0
+      && <Countdown
+        date={nextRefresh as number}
+        renderer={({ hours, minutes, seconds, completed }) =>
+        {
+          if (completed)
+          {
+            return <span className='text-emerald-400 text-center'>Updating prices ...</span>
+          }
+          else
+          {
+            return <span className='text-white/50 text-center'>Updating in {seconds}s</span>
+          }
+        }}
+      />
+    }
 
     <div className='grid grid-cols-2 gap-1 w-full'>
       {(exchangeRates as ExchangeRate[]).map((exchangeRate: ExchangeRate) => (
