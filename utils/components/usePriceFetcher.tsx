@@ -28,7 +28,7 @@ export default function usePriceFetcher({ currencyToBuy }: Props)
                 .then(data => setBinancePrice(parseFloat(data.price)))
                 .catch(() => setBinancePrice(0))
 
-            await fetch(`https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=${currency}-USDT`, { cache: 'no-store' })
+            await fetch(`https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=${currency}-USDT`, { cache: 'no-store', mode: 'no-cors' })
                 .then(res => res.json())
                 .then(data => setKucoinPrice(parseFloat(data.data.price)))
                 .catch(() => setKucoinPrice(0))
