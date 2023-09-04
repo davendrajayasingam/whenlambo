@@ -3,12 +3,11 @@
 import usePriceFetcher from '@/utils/components/usePriceFetcher'
 import { classNames } from '@/utils/helpers/tailwindHelper'
 
-export default function BTCPage({ params }: { params: { currencyId: string } }) 
+export default function CurrencyPage({ params }: { params: { currencyId: string } }) 
 {
   const { currencyId } = params
 
-  const prices = usePriceFetcher({ currencyToBuy: currencyId })
-  const [binancePrice, kucoinPrice, krakenPrice, bybitPrice] = prices
+  const [exchangeRates, nextRefresh] = usePriceFetcher({ currencyToBuy: currencyId })
 
   const currencyFormatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -16,20 +15,20 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
     minimumFractionDigits: 2
   })
 
-  const showPrice = (exchange: Exchange, price: number) => (
+  const PriceData = ({ data }: { data: ExchangeRate }) => (
     <div className={classNames(
-      price === Math.min(...prices.filter(price => price !== 0)) ? 'bg-emerald-500' : 'bg-rose-500',
+      data.price === Math.min(...(exchangeRates as ExchangeRate[]).map(e => e.price).filter(price => data.price !== 0)) ? 'bg-emerald-500' : 'bg-rose-500',
       'p-4 w-full h-full aspect-video',
       'flex flex-col items-center justify-center space-y-2',
     )}>
       <p className='font-bold text-white/80 text-center text-lg'>
-        {exchange}
+        {data.exchange}
       </p>
       <p className='font-bold text-white text-center text-2xl'>
         {
-          price === 0
+          data.price === 0
             ? 'N/A'
-            : currencyFormatter.format(price)
+            : currencyFormatter.format(data.price)
         }
       </p>
     </div>
@@ -53,10 +52,12 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
     </p>
 
     <div className='grid grid-cols-2 gap-1 w-full'>
-      {showPrice('Binance', binancePrice)}
-      {showPrice('Kucoin', kucoinPrice)}
-      {showPrice('Kraken', krakenPrice)}
-      {showPrice('Bybit', bybitPrice)}
+      {(exchangeRates as ExchangeRate[]).map((exchangeRate: ExchangeRate) => (
+        <PriceData
+          key={exchangeRate.exchange}
+          data={exchangeRate}
+        />
+      ))}
     </div>
 
   </div>
