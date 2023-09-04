@@ -1,3 +1,65 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": "next/core-web-vitals",
+  "rules": {
+    "strict": 1,
+    // disallows semicolons as the end of statements
+    "semi": [
+      "error",
+      "never"
+    ],
+    // braces are expected to be on their own lines without any extra indentation
+    "brace-style": [
+      "error",
+      "allman",
+      {
+        "allowSingleLine": true
+      }
+    ],
+    // function withoutSpace(x)
+    "space-before-function-paren": [
+      "error",
+      {
+        "anonymous": "always",
+        "named": "never",
+        "asyncArrow": "always"
+      }
+    ],
+    // var foo = {
+    //     bar: "baz",
+    //     qux: "quux",
+    // }
+    "comma-dangle": [
+      "error",
+      "never"
+    ],
+    // enforces that files do not end with a newline
+    "eol-last": [
+      "error",
+      "never"
+    ],
+    // single quotes only
+    "quotes": [
+      "error",
+      "single"
+    ],
+    "jsx-quotes": [
+      "error",
+      "prefer-single"
+    ],
+    // var fullHeight = borderTop
+    //                + innerHeight
+    //                + borderBottom;
+    "operator-linebreak": [
+      "error",
+      "before"
+    ],
+    // checks all variables for usage, including those in the global scope.
+    // disabled because it causes complications with TypeScript
+    // "no-unused-vars": [
+    //   "error",
+    //   "all"
+    // ],
+    "react-hooks/exhaustive-deps": "warn",
+    "react/no-unescaped-entities": "off"
+  }
 }
