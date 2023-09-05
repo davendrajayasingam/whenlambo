@@ -37,7 +37,7 @@ export default function usePriceFetcher({ currencyToBuy }: Props)
                     .then(data => setBinancePrice(parseFloat(data.price)))
                     .catch(() => toast.error('Failed to fetch Binance price')),
                 // Kucoin has a cors issue, so we use our own api gateway to get the price
-                axios.get(`/api/prices/${currencyToBuy.toLowerCase()}`, {
+                axios.get(`/api/kucoin/${currencyToBuy.toLowerCase()}`, {
                     headers: {
                         'Cache-Control': 'no-cache',
                         'Pragma': 'no-cache',
