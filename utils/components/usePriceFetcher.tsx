@@ -19,12 +19,12 @@ export default function usePriceFetcher({ currencyToBuy }: Props)
     // setup a timer to fetch and update prices every {x} seconds
     useEffect(() =>
     {
-        if (currencyToBuy !== 'btc' && currencyToBuy !== 'eth')
+        const currency = currencyToBuy.toUpperCase()
+
+        if (currency !== 'BTC' && currency !== 'ETH')
         {
             return
         }
-
-        const currency = currencyToBuy.toUpperCase()
 
         const fetchPrices = async () =>
         {
@@ -35,11 +35,7 @@ export default function usePriceFetcher({ currencyToBuy }: Props)
                 })
                     .then(res => res.json())
                     .then(data => setBinancePrice(parseFloat(data.price)))
-                    .catch(() =>
-                    {
-                        setBinancePrice(0)
-                        toast.error('Failed to fetch Binance price')
-                    }),
+                    .catch(() => toast.error('Failed to fetch Binance price')),
                 // Kucoin has a cors issue, so we use our own api gateway to get the price
                 axios.get(`/api/prices/${currencyToBuy.toLowerCase()}`, {
                     headers: {
@@ -49,33 +45,21 @@ export default function usePriceFetcher({ currencyToBuy }: Props)
                     }
                 })
                     .then(response => setKucoinPrice(parseFloat(response.data)))
-                    .catch(() =>
-                    {
-                        setKucoinPrice(0)
-                        toast.error('Failed to fetch Kucoin price')
-                    }),
+                    .catch(() => toast.error('Failed to fetch Kucoin price')),
                 // Kraken
                 fetch(`https://api.kraken.com/0/public/Ticker?pair=${currency}USDT`, {
                     cache: 'no-store'
                 })
                     .then(res => res.json())
                     .then(data => setKrakenPrice(parseFloat(data.result[Object.keys(data.result)[0]].c[0])))
-                    .catch(() =>
-                    {
-                        setKrakenPrice(0)
-                        toast.error('Failed to fetch Kraken price')
-                    }),
+                    .catch(() => toast.error('Failed to fetch Kraken price')),
                 // Bybit
                 fetch(`https://api.bybit.com/v2/public/tickers?symbol=${currency}USDT`, {
                     cache: 'no-store'
                 })
                     .then(res => res.json())
                     .then(data => setBybitPrice(parseFloat(data.result[0].last_price)))
-                    .catch(() =>
-                    {
-                        setBybitPrice(0)
-                        toast.error('Failed to fetch Bybit price')
-                    })
+                    .catch(() => toast.error('Failed to fetch Bybit price'))
             ])
                 .catch(() => toast.error('Failed to fetch prices.'))
                 .finally(() => setNextRefresh(Date.now() + intervalInMs))
