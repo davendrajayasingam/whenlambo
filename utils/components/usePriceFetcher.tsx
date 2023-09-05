@@ -1,21 +1,22 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
+import { toast } from 'react-hot-toast'
 
 type Props = {
     currencyToBuy: string
 }
 
+const intervalInMs = 10000 // refresh the data every 10 seconds
+
 export default function usePriceFetcher({ currencyToBuy }: Props)
 {
-    const [prices, setPrices] = useState<number[]>([0, 0, 0, 0])
-    const [nextRefresh, setNextRefresh] = useState<number>(0)
-
     const [binancePrice, setBinancePrice] = useState<number>(0)
     const [kucoinPrice, setKucoinPrice] = useState<number>(0)
     const [krakenPrice, setKrakenPrice] = useState<number>(0)
     const [bybitPrice, setBybitPrice] = useState<number>(0)
+    const [nextRefresh, setNextRefresh] = useState<number>(0)
 
-    // setup a timer to fetch and update prices every 5 seconds
+    // setup a timer to fetch and update prices every {x} seconds
     useEffect(() =>
     {
         if (currencyToBuy !== 'btc' && currencyToBuy !== 'eth')
@@ -27,36 +28,65 @@ export default function usePriceFetcher({ currencyToBuy }: Props)
 
         const fetchPrices = async () =>
         {
-            await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${currency}USDT`, { cache: 'no-store' })
+            // Binance
+            await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${currency}USDT`, {
+                cache: 'no-store'
+            })
                 .then(res => res.json())
                 .then(data => setBinancePrice(parseFloat(data.price)))
-                .catch(() => setBinancePrice(0))
+                .catch(() =>
+                {
+                    setBinancePrice(0)
+                    toast.error('Failed to fetch Binance price')
+                })
 
-            // await fetch(`https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=${currency}-USDT`, { cache: 'no-store' })
-            //     .then(res => res.json())
-            //     .then(data => setKucoinPrice(parseFloat(data.data.price)))
-            //     .catch(() => setKucoinPrice(0))
-
-            await axios.get(`/api/prices/${currencyToBuy.toLowerCase()}`)
+            // Kucoin has a cors issue, so we use our own api gateway to get the price
+            await axios.get(`/api/prices/${currencyToBuy.toLowerCase()}`, {
+                headers: {
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            })
                 .then(response => setKucoinPrice(parseFloat(response.data)))
-                .catch(() => setKucoinPrice(0))
+                .catch(() =>
+                {
+                    setKucoinPrice(0)
+                    toast.error('Failed to fetch Kucoin price')
+                })
 
-            await fetch(`https://api.kraken.com/0/public/Ticker?pair=${currency}USDT`, { cache: 'no-store' })
+            // Kraken
+            await fetch(`https://api.kraken.com/0/public/Ticker?pair=${currency}USDT`, {
+                cache: 'no-store'
+            })
                 .then(res => res.json())
                 .then(data => setKrakenPrice(parseFloat(data.result[Object.keys(data.result)[0]].c[0])))
-                .catch(() => setKrakenPrice(0))
+                .catch(() =>
+                {
+                    setKrakenPrice(0)
+                    toast.error('Failed to fetch Kraken price')
+                })
 
-            await fetch(`https://api.bybit.com/v2/public/tickers?symbol=${currency}USDT`, { cache: 'no-store' })
+            // Bybit
+            await fetch(`https://api.bybit.com/v2/public/tickers?symbol=${currency}USDT`, {
+                cache: 'no-store'
+            })
                 .then(res => res.json())
                 .then(data => setBybitPrice(parseFloat(data.result[0].last_price)))
-                .catch(() => setBybitPrice(0))
+                .catch(() =>
+                {
+                    setBybitPrice(0)
+                    toast.error('Failed to fetch Bybit price')
+                })
+
+            // Next refresh
+            setNextRefresh(Date.now() + intervalInMs)
         }
         fetchPrices()
 
-        const timer = setInterval(fetchPrices, 5000)
-
+        const timer = setInterval(fetchPrices, intervalInMs)
         return () => clearInterval(timer)
     }, [currencyToBuy])
 
-    return [binancePrice, kucoinPrice, krakenPrice, bybitPrice]
+    return [binancePrice, kucoinPrice, krakenPrice, bybitPrice, nextRefresh]
 }
