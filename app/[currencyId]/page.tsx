@@ -1,9 +1,11 @@
 'use client'
 
+import Link from 'next/link'
+import { FaSpinner } from 'react-icons/fa6'
+
 import useCountdown from '@/utils/components/useCountdown'
 import usePriceFetcher from '@/utils/components/usePriceFetcher'
 import { classNames } from '@/utils/helpers/tailwindHelper'
-import Link from 'next/link'
 
 export default function BTCPage({ params }: { params: { currencyId: string } }) 
 {
@@ -89,7 +91,7 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
       {
         secondsUntilRefresh > 0
           ? <span className='text-white/50'>Updating in {secondsUntilRefresh}s</span>
-          : <span className='text-emerald-400'>Updating prices ...</span>
+          : <span className='text-emerald-400 flex items-center justify-center space-x-1'><FaSpinner className='animate-spin' /> <span>Updating prices ...</span></span>
       }
     </p>
 

@@ -11,7 +11,7 @@ export default function useCountdown({ targetTimeInMs }: Props)
 
     useEffect(() =>
     {
-        const getSecondsRemaining = () => Math.abs(Math.floor(((targetTimeInMs - Date.now()) % (1000 * 60)) / 1000))
+        const getSecondsRemaining = () => Math.floor(((targetTimeInMs - Date.now()) % (1000 * 60)) / 1000)
         setSecondsRemaining(getSecondsRemaining())
 
         const interval = setInterval(() => setSecondsRemaining(getSecondsRemaining()), 1000)
