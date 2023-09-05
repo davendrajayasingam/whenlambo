@@ -38,6 +38,14 @@ export default function usePriceFetcher({ currencyToBuy }: Props)
     })
     const [nextUpdate, setNextUpdate] = useState<number>(0)
 
+    const defaultBestExchange = {
+        exchange: 'N/A',
+        currency,
+        bidPrice: 0,
+        askPrice: 0
+    }
+    const [bestExchange, setBestExchange] = useState<SpotPrice>(defaultBestExchange)
+
     // setup a timer to fetch and update prices every {x} seconds
     useEffect(() =>
     {
@@ -83,11 +91,15 @@ export default function usePriceFetcher({ currencyToBuy }: Props)
         return () => clearInterval(timer)
     }, [currencyToBuy])
 
-    const bestAsk = Math.min(...[binancePrice.askPrice, kucoinPrice.askPrice, krakenPrice.askPrice, bybitPrice.askPrice].filter(price => price !== 0))
+    useEffect(() =>
+    {
+        const bestAsk = Math.min(...[binancePrice.askPrice, kucoinPrice.askPrice, krakenPrice.askPrice, bybitPrice.askPrice].filter(price => price !== 0))
+        setBestExchange([binancePrice, kucoinPrice, krakenPrice, bybitPrice].find(price => price.askPrice === bestAsk) || defaultBestExchange)
+    }, [binancePrice, kucoinPrice, krakenPrice, bybitPrice])
 
     return {
         prices: [binancePrice, kucoinPrice, krakenPrice, bybitPrice],
         nextUpdate,
-        bestAsk
+        bestExchange
     } as SpotPricesResponse
 }

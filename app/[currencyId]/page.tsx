@@ -23,7 +23,7 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
 
   const showPrice = (spotPrice: SpotPrice) => (
     <div className={classNames(
-      spotPrice.askPrice === results.bestAsk ? 'bg-emerald-500' : 'bg-rose-500',
+      spotPrice.askPrice === results.bestExchange.askPrice ? 'bg-emerald-500' : 'bg-rose-500',
       'w-full h-full py-2',
     )}>
       <p className='p-2 pb-0 font-bold text-white/80 text-center text-lg'>
@@ -81,9 +81,7 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
         </span>
       </p>
       <p className='font-bold text-4xl text-white/80 text-center'>
-        on <span className='text-emerald-400'>
-
-        </span>
+        on <span className='text-emerald-400'>{results.bestExchange.exchange}</span>
       </p>
     </div>
 

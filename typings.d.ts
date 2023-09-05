@@ -8,5 +8,5 @@ type SpotPrice = {
 type SpotPricesResponse = {
     prices: SpotPrice[]
     nextUpdate: number
-    bestAsk: number
+    bestExchange: SpotPrice
 }
