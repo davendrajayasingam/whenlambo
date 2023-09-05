@@ -17,22 +17,38 @@ export async function GET(req: NextRequest, { params }: { params: { currencyId: 
     }
 
     const [binancePrice, kucoinPrice, krakenPrice, bybitPrice] = await Promise.all([
-        fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${currency}USDT`, { cache: 'no-store' })
+        fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${currency}USDT`, { next: { revalidate: 5 } })
             .then(res => res.json())
             .then(data => parseFloat(data.price))
-            .catch(() => 0),
-        fetch(`https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=${currency}-USDT`, { cache: 'no-store' })
+            .catch(err =>
+            {
+                console.error(err)
+                return 0
+            }),
+        fetch(`https://api.kucoin.com/api/v1/market/orderbook/level1?symbol=${currency}-USDT`, { next: { revalidate: 5 } })
             .then(res => res.json())
             .then(data => parseFloat(data.data.price))
-            .catch(() => 0),
-        fetch(`https://api.kraken.com/0/public/Ticker?pair=${currency}USDT`, { cache: 'no-store' })
+            .catch(err =>
+            {
+                console.error(err)
+                return 0
+            }),
+        fetch(`https://api.kraken.com/0/public/Ticker?pair=${currency}USDT`, { next: { revalidate: 5 } })
             .then(res => res.json())
             .then(data => parseFloat(data.result[Object.keys(data.result)[0]].c[0]))
-            .catch(() => 0),
-        fetch(`https://api.bybit.com/v2/public/tickers?symbol=${currency}USDT`, { cache: 'no-store' })
+            .catch(err =>
+            {
+                console.error(err)
+                return 0
+            }),
+        fetch(`https://api.bybit.com/v2/public/tickers?symbol=${currency}USDT`, { next: { revalidate: 5 } })
             .then(res => res.json())
             .then(data => parseFloat(data.result[0].last_price))
-            .catch(() => 0)
+            .catch(err =>
+            {
+                console.error(err)
+                return 0
+            })
     ])
 
     payload[0].price = binancePrice

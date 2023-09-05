@@ -19,16 +19,16 @@ export default function usePriceFetcher({ currencyToBuy }: Props)
             return
         }
 
-        const fetchPrices = async () =>
+        const fetchPrices = () =>
         {
             axios.get(`/api/prices/${currencyToBuy.toLowerCase()}`)
                 .then(response => setPrices(response.data))
                 .catch(error => toast.error('Failed to fetch prices. Trying again...'))
-                .finally(() => setNextRefresh(Date.now() + 5000))
+                .finally(() => setNextRefresh(Date.now() + 10000))
         }
         fetchPrices()
 
-        const timer = setInterval(fetchPrices, 5000)
+        const timer = setInterval(fetchPrices, 10000)
 
         return () => clearInterval(timer)
     }, [currencyToBuy])
