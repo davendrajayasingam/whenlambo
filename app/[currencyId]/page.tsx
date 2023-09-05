@@ -11,10 +11,9 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
 {
   const { currencyId } = params
 
-  const [binancePrice, kucoinPrice, krakenPrice, bybitPrice, nextRefresh] = usePriceFetcher({ currencyToBuy: currencyId })
-  const prices = [binancePrice, kucoinPrice, krakenPrice, bybitPrice]
+  const results = usePriceFetcher({ currencyToBuy: currencyId })
 
-  const secondsUntilRefresh = useCountdown({ targetTimeInMs: nextRefresh })
+  const secondsUntilUpdate = useCountdown({ targetTimeInMs: results.nextUpdate })
 
   const currencyFormatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -22,29 +21,47 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
     minimumFractionDigits: 2
   })
 
-  const showPrice = (exchange: Exchange, price: number) => (
+  const showPrice = (spotPrice: SpotPrice) => (
     <div className={classNames(
-      price === Math.min(...prices.filter(price => price !== 0)) ? 'bg-emerald-500' : 'bg-rose-500',
-      'p-4 w-full h-full aspect-video',
-      'flex flex-col items-center justify-center space-y-2',
+      spotPrice.askPrice === results.bestAsk ? 'bg-emerald-500' : 'bg-rose-500',
+      'w-full h-full py-2',
     )}>
-      <p className='font-bold text-white/80 text-center text-lg'>
-        {exchange}
+      <p className='p-2 pb-0 font-bold text-white/80 text-center text-lg'>
+        {spotPrice.exchange}
       </p>
-      <p className='font-bold text-white text-center text-2xl'>
-        {
-          price === 0
-            ? 'N/A'
-            : currencyFormatter.format(price)
-        }
-      </p>
+      <div className='grid sm:grid-cols-2 place-items-center p-2 gap-2'>
+        <div>
+          <p className='font-bold text-white/80 text-center'>
+            Bid
+          </p>
+          <p className='font-bold text-white text-center text-lg'>
+            {
+              spotPrice.bidPrice === 0
+                ? 'N/A'
+                : currencyFormatter.format(spotPrice.bidPrice)
+            }
+          </p>
+        </div>
+        <div>
+          <p className='font-bold text-white/80 text-center'>
+            Ask
+          </p>
+          <p className='font-bold text-white text-center text-lg'>
+            {
+              spotPrice.askPrice === 0
+                ? 'N/A'
+                : currencyFormatter.format(spotPrice.askPrice)
+            }
+          </p>
+        </div>
+      </div>
     </div>
   )
 
   if (currencyId !== 'btc' && currencyId !== 'eth')
   {
     return (
-      <div className='p-6 w-full h-full max-w-lg mx-auto flex flex-col space-y-6'>
+      <div className='p-6 w-full h-full max-w-xl mx-auto flex flex-col space-y-6'>
         <p className='font-semibold text-2xl text-rose-400 text-center'>
           {currencyId.toUpperCase()} is not supported.
         </p>
@@ -52,7 +69,7 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
     )
   }
 
-  return <div className='p-6 w-full h-full max-w-lg mx-auto flex flex-col space-y-6'>
+  return <div className='p-6 w-full h-full max-w-xl mx-auto flex flex-col space-y-6'>
 
     <div>
       <p className='font-semibold text-2xl text-white/80 text-center'>
@@ -65,32 +82,19 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
       </p>
       <p className='font-bold text-4xl text-white/80 text-center'>
         on <span className='text-emerald-400'>
-          {
-            binancePrice === Math.min(...prices.filter(price => price !== 0))
-              ? 'Binance'
-              : kucoinPrice === Math.min(...prices.filter(price => price !== 0))
-                ? 'Kucoin'
-                : krakenPrice === Math.min(...prices.filter(price => price !== 0))
-                  ? 'Kraken'
-                  : bybitPrice === Math.min(...prices.filter(price => price !== 0))
-                    ? 'Bybit'
-                    : '...'
-          }
+
         </span>
       </p>
     </div>
 
     <div className='grid grid-cols-2 gap-1 w-full'>
-      {showPrice('Binance', binancePrice)}
-      {showPrice('Kucoin', kucoinPrice)}
-      {showPrice('Kraken', krakenPrice)}
-      {showPrice('Bybit', bybitPrice)}
+      {results.prices.map(showPrice)}
     </div>
 
     <p className='text-center'>
       {
-        secondsUntilRefresh > 0
-          ? <span className='text-white/50'>Updating in {secondsUntilRefresh}s</span>
+        secondsUntilUpdate > 0
+          ? <span className='text-white/50'>Updating in {secondsUntilUpdate}s</span>
           : <span className='text-emerald-400 flex items-center justify-center space-x-1'><FaSpinner className='animate-spin' /> <span>Updating prices ...</span></span>
       }
     </p>

@@ -1,8 +1,12 @@
-type Exchange = 'Binance' | 'Kucoin' | 'Kraken' | 'Bybit'
+type SpotPrice = {
+    exchange: string
+    currency: string
+    bidPrice: number
+    askPrice: number
+}
 
-type Currency = 'BTC' | 'ETH'
-
-type ExchangeRate = {
-    exchange: Exchange
-    price: number
+type SpotPricesResponse = {
+    prices: SpotPrice[]
+    nextUpdate: number
+    bestAsk: number
 }

@@ -4,7 +4,7 @@ type Props = {
     targetTimeInMs: number
 }
 
-// Just a quick countdown timer hook to display seconds remaining until the next price refresh
+// Just a quick countdown timer hook to display seconds remaining until the next price update
 export default function useCountdown({ targetTimeInMs }: Props)
 {
     const [secondsRemaining, setSecondsRemaining] = useState(0)
