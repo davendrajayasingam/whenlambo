@@ -1,8 +1,17 @@
 import Link from 'next/link'
+import Image from 'next/image'
+
+import introImage from '@/public/images/og-image.jpg'
 
 export default async function HomePage() 
 {
-  return <div className='p-6 flex flex-col items-center justify-center h-full space-y-8 max-w-screen-sm mx-auto'>
+  return <div className='p-6 mt-16 h-full space-y-8 max-w-screen-sm mx-auto'>
+
+    <Image
+      src={introImage}
+      alt='When Lambo?'
+      className='rounded-lg'
+    />
 
     <p className='font-semibold text-2xl text-white/80 text-center'>
       What would you like to buy with USDT?
