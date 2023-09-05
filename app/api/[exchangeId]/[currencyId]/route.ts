@@ -24,7 +24,7 @@ export async function GET(req: NextRequest, { params }: { params: { exchangeId: 
 
     if (exchange === 'BINANCE')
     {
-        const price = await fetch(`https://data-api.binance.vision/bookTicker?symbol=${currency}USDT`, {
+        const price = await fetch(`https://data-api.binance.vision/api/v3/ticker/bookTicker?symbol=${currency}USDT`, {
             next: { revalidate: 5 }
         })
             .then(res => res.json())
