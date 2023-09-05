@@ -5,7 +5,7 @@ import introImage from '@/public/images/og-image.jpg'
 
 export default async function HomePage() 
 {
-  return <div className='p-6 mt-16 h-full space-y-8 max-w-screen-sm mx-auto'>
+  return <div className='p-6 mt-6 h-full space-y-8 max-w-screen-sm mx-auto'>
 
     <Image
       src={introImage}
