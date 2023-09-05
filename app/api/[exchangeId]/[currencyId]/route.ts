@@ -24,11 +24,8 @@ export async function GET(req: NextRequest, { params }: { params: { exchangeId: 
 
     if (exchange === 'BINANCE')
     {
-        const price = await fetch(`https://api.binance.com/api/v3/ticker/bookTicker?symbol=${currency}USDT`, {
-            next: { revalidate: 5 },
-            headers: {
-                'X-MBX-APIKEY': process.env.BINANCE_API_KEY!
-            }
+        const price = await fetch(`https://data-api.binance.vision/bookTicker?symbol=${currency}USDT`, {
+            next: { revalidate: 5 }
         })
             .then(res => res.json())
             .then(data =>
