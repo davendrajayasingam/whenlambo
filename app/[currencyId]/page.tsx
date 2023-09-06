@@ -13,7 +13,7 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
   const binanceSocket: SocketData = useBinanceWebsocket({ currencyToBuy: currencyId })
   const bybitSocket: SocketData = useBybitWebsocket({ currencyToBuy: currencyId })
 
-  const getBestExchanges = (): SocketData[] =>
+  const getCheapestExchanges = (): SocketData[] =>
   {
     const exchanges = [binanceSocket, bybitSocket]
       .filter(socket => socket.status === 'connected')
@@ -27,8 +27,8 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
 
     return exchanges.filter(socket => socket.spot.askPrice === lowestAsk)
   }
-  const bestExchanges = getBestExchanges()
-  const bestExchangeNames = bestExchanges.map(socket => socket.spot.exchange).join(', or ')
+  const cheapestExchanges = getCheapestExchanges()
+  const cheapestExchangeNames = cheapestExchanges.map(socket => socket.spot.exchange).join(', or ')
 
   // const results = usePriceFetcher({ currencyToBuy: currencyId })
 
@@ -40,7 +40,7 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
 
   const showPrice = (spotPrice: SpotPrice, status: ConnectionStatus) => (
     <div className={classNames(
-      spotPrice.askPrice === bestExchanges?.[0]?.spot?.askPrice ? 'bg-emerald-500' : 'bg-rose-500',
+      spotPrice.askPrice === cheapestExchanges?.[0]?.spot?.askPrice ? 'bg-emerald-500' : 'bg-rose-500',
       'w-full h-full py-2',
     )}>
       <p className='p-2 pb-0 font-bold text-white/80 text-center text-lg'>
@@ -105,9 +105,9 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
         </span>
       </p>
       {
-        bestExchangeNames !== ''
+        cheapestExchangeNames !== ''
         && <p className='font-bold text-4xl text-white/80 text-center'>
-          on <span className='text-emerald-400'>{bestExchangeNames}</span>
+          on <span className='text-emerald-400'>{cheapestExchangeNames}</span>
         </p>
       }
     </div>
