@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import { Socket, io } from 'socket.io-client'
 
 type Props = {
     currencyToBuy: string
@@ -28,7 +27,7 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
             return
         }
 
-        let socket: Socket
+        let socket: WebSocket
         let heartbeatInterval: NodeJS.Timeout
         const topic = `orderbook.1.${currencyToBuy.toUpperCase()}USDT`
 
@@ -48,26 +47,25 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
             heartbeatInterval = setInterval(() => socket.send(JSON.stringify({ 'op': 'ping' })), 20000)
         }
 
-        const socketMessageListener = ({ type, data }: any) =>
+        const socketMessageListener = (event: MessageEvent) =>
         {
-            console.log('type', type, 'data', data)
-            // const tickerData = JSON.parse(event.data)
+            const tickerData = JSON.parse(event.data)
 
-            // if (tickerData.topic === topic)
-            // {
-            //     bidPriceRef.current = parseFloat(tickerData.data.b?.[0]?.[0] || 0) || bidPriceRef.current
-            //     askPriceRef.current = parseFloat(tickerData.data.a?.[0]?.[0] || 0) || askPriceRef.current
-            //     statusRef.current = 'connected'
+            if (tickerData.topic === topic)
+            {
+                bidPriceRef.current = parseFloat(tickerData.data.b?.[0]?.[0] || 0) || bidPriceRef.current
+                askPriceRef.current = parseFloat(tickerData.data.a?.[0]?.[0] || 0) || askPriceRef.current
+                statusRef.current = 'connected'
 
-            //     setSocketData({
-            //         spot: {
-            //             ...socketData.spot,
-            //             bidPrice: bidPriceRef.current,
-            //             askPrice: askPriceRef.current
-            //         },
-            //         status: statusRef.current
-            //     })
-            // }
+                setSocketData({
+                    spot: {
+                        ...socketData.spot,
+                        bidPrice: bidPriceRef.current,
+                        askPrice: askPriceRef.current
+                    },
+                    status: statusRef.current
+                })
+            }
         }
 
         const socketErrorListener = () =>
@@ -88,14 +86,11 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
             })
 
             // reopens the socket in case of disconnection
-            socket = io('wss://stream.bybit.com/v5/public/spot', {
-                reconnectionDelayMax: 10000
-            })
-            // socket = new WebSocket('wss://stream.bybit.com/v5/public/spot')
-            socket.io.on('open', socketOpenListener)
-            socket.io.on('packet', socketMessageListener)
-            socket.io.on('error', socketErrorListener)
-            socket.io.on('close', socketCloseListener)
+            socket = new WebSocket('wss://stream.bybit.com/v5/public/spot')
+            socket.addEventListener('open', socketOpenListener)
+            socket.addEventListener('message', socketMessageListener)
+            socket.addEventListener('error', socketErrorListener)
+            socket.addEventListener('close', socketCloseListener)
         }
 
         socketCloseListener()
