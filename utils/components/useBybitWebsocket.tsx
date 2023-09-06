@@ -8,7 +8,7 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
 {
     const bidPriceRef = useRef<number>(0)
     const askPriceRef = useRef<number>(0)
-    const statusRef = useRef<ConnectionStatus>('disconnected')
+    const statusRef = useRef<ConnectionStatus>('connecting ...')
 
     const [socketData, setSocketData] = useState<SocketData>({
         spot: {
@@ -26,20 +26,12 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
         {
             return
         }
-        
+
+        let socket: WebSocket
         let heartbeatInterval: NodeJS.Timeout
-
-        statusRef.current = 'connecting ...'
-        setSocketData({
-            ...socketData,
-            status: statusRef.current
-        })
-
-        const socket = new WebSocket('wss://stream.bybit.com/v5/public/spot')
         const topic = `orderbook.1.${currencyToBuy.toUpperCase()}USDT`
 
-        // Open
-        socket.addEventListener('open', () =>
+        const socketOpenListener = () =>
         {
             statusRef.current = 'established'
             setSocketData({
@@ -53,10 +45,9 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
             }))
 
             heartbeatInterval = setInterval(() => socket.send(JSON.stringify({ 'op': 'ping' })), 20000)
-        })
+        }
 
-        // Message
-        socket.addEventListener('message', event =>
+        const socketMessageListener = (event: MessageEvent) =>
         {
             const tickerData = JSON.parse(event.data)
 
@@ -75,35 +66,42 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
                     status: statusRef.current
                 })
             }
-        })
+        }
 
-        // Error
-        socket.addEventListener('error', () =>
+        const socketErrorListener = () =>
         {
             statusRef.current = 'error'
             setSocketData({
                 ...socketData,
                 status: statusRef.current
             })
-        })
+        }
 
-        // Handle WebSocket close event
-        socket.addEventListener('close', () => 
+        const socketCloseListener = () =>
         {
-            statusRef.current = 'disconnected'
+            statusRef.current = 'connecting ...'
             setSocketData({
                 ...socketData,
                 status: statusRef.current
             })
-        })
+
+            // reopens the socket in case of disconnection
+            socket = new WebSocket('wss://stream.bybit.com/v5/public/spot')
+            socket.addEventListener('open', socketOpenListener)
+            socket.addEventListener('message', socketMessageListener)
+            socket.addEventListener('error', socketErrorListener)
+            socket.addEventListener('close', socketCloseListener)
+        }
+
+        socketCloseListener()
 
         return () =>
         {
-            socket.close()
             if (heartbeatInterval)
             {
                 clearInterval(heartbeatInterval)
             }
+            socket.close()
         }
     }, [currencyToBuy])
 
