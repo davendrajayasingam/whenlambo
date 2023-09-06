@@ -46,7 +46,9 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
     <div
       key={spotPrice.exchange}
       className={classNames(
-        spotPrice.askPrice === cheapestExchanges?.[0]?.spot?.askPrice ? 'bg-emerald-500' : 'bg-rose-500',
+        status === 'connected'
+          ? (spotPrice.askPrice === cheapestExchanges?.[0]?.spot?.askPrice ? 'bg-emerald-500' : 'bg-rose-500')
+          : 'bg-gray-700',
         'w-full h-full py-2',
       )}
     >
