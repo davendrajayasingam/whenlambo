@@ -22,6 +22,11 @@ export default function useKrakenWebsocket({ currencyToBuy }: Props)
 
     useEffect(() =>
     {
+        if (!currencyToBuy)
+        {
+            return
+        }
+
         statusRef.current = 'connecting ...'
         setSocketData({
             ...socketData,
@@ -53,7 +58,6 @@ export default function useKrakenWebsocket({ currencyToBuy }: Props)
         {
             const tickerData = JSON.parse(event.data)
 
-            console.log('tickerData', tickerData)
             if (tickerData[2] === 'ticker' && tickerData[3] === currencyToBuy.toUpperCase() + '/USDT')
             {
                 bidPriceRef.current = parseFloat(tickerData[1].b[0])

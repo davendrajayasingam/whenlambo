@@ -22,6 +22,11 @@ export default function useBinanceWebsocket({ currencyToBuy }: Props)
 
     useEffect(() =>
     {
+        if (!currencyToBuy)
+        {
+            return
+        }
+
         statusRef.current = 'connecting ...'
         setSocketData({
             ...socketData,

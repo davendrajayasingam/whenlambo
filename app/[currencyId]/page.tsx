@@ -6,6 +6,7 @@ import { classNames } from '@/utils/helpers/tailwindHelper'
 import useBinanceWebsocket from '@/utils/components/useBinanceWebsocket'
 import useBybitWebsocket from '@/utils/components/useBybitWebsocket'
 import useKrakenWebsocket from '@/utils/components/useKrakenWebsocket'
+import useKucoinWebsocket from '@/utils/components/useKucoinWebsocket'
 
 export default function BTCPage({ params }: { params: { currencyId: string } }) 
 {
@@ -14,7 +15,8 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
   const sockets = [
     useBinanceWebsocket({ currencyToBuy: currencyId }),
     useBybitWebsocket({ currencyToBuy: currencyId }),
-    useKrakenWebsocket({ currencyToBuy: currencyId })
+    useKrakenWebsocket({ currencyToBuy: currencyId }),
+    useKucoinWebsocket({ currencyToBuy: currencyId })
   ]
 
   const getCheapestExchanges = (): SocketData[] =>
@@ -43,10 +45,13 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
   })
 
   const showPrice = (spotPrice: SpotPrice, status: ConnectionStatus) => (
-    <div className={classNames(
-      spotPrice.askPrice === cheapestExchanges?.[0]?.spot?.askPrice ? 'bg-emerald-500' : 'bg-rose-500',
-      'w-full h-full py-2',
-    )}>
+    <div
+      key={spotPrice.exchange}
+      className={classNames(
+        spotPrice.askPrice === cheapestExchanges?.[0]?.spot?.askPrice ? 'bg-emerald-500' : 'bg-rose-500',
+        'w-full h-full py-2',
+      )}
+    >
       <p className='p-2 pb-0 font-bold text-white/80 text-center text-lg'>
         {spotPrice.exchange}
       </p>

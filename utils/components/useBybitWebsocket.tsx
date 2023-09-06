@@ -22,6 +22,11 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
 
     useEffect(() =>
     {
+        if (!currencyToBuy)
+        {
+            return
+        }
+        
         let heartbeatInterval: NodeJS.Timeout
 
         statusRef.current = 'connecting ...'
