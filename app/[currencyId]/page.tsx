@@ -1,19 +1,37 @@
 'use client'
 
 import Link from 'next/link'
-import { FaSpinner } from 'react-icons/fa6'
 
-import useCountdown from '@/utils/components/useCountdown'
-import usePriceFetcher from '@/utils/components/usePriceFetcher'
 import { classNames } from '@/utils/helpers/tailwindHelper'
+import useBinanceWebsocket from '@/utils/components/useBinanceWebsocket'
+import useBybitWebsocket from '@/utils/components/useBybitWebsocket'
 
 export default function BTCPage({ params }: { params: { currencyId: string } }) 
 {
   const { currencyId } = params
 
-  const results = usePriceFetcher({ currencyToBuy: currencyId })
+  const binanceSocket: SocketData = useBinanceWebsocket({ currencyToBuy: currencyId })
+  const bybitSocket: SocketData = useBybitWebsocket({ currencyToBuy: currencyId })
 
-  const secondsUntilUpdate = useCountdown({ targetTimeInMs: results.nextUpdate })
+  const getBestExchanges = (): SocketData[] =>
+  {
+    const lowestAsk = Math.min(
+      binanceSocket.spot.askPrice,
+      bybitSocket.spot.askPrice
+    )
+
+    if (lowestAsk === 0)
+    {
+      return []
+    }
+
+    return [binanceSocket, bybitSocket]
+      .filter(socket => socket.spot.askPrice === lowestAsk)
+  }
+  const bestExchanges = getBestExchanges()
+  const bestExchangeNames = bestExchanges.map(socket => socket.spot.exchange).join(', or ')
+
+  // const results = usePriceFetcher({ currencyToBuy: currencyId })
 
   const currencyFormatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -21,9 +39,9 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
     minimumFractionDigits: 2
   })
 
-  const showPrice = (spotPrice: SpotPrice) => (
+  const showPrice = (spotPrice: SpotPrice, status: ConnectionStatus) => (
     <div className={classNames(
-      spotPrice.askPrice === results.bestExchange.askPrice ? 'bg-emerald-500' : 'bg-rose-500',
+      spotPrice.askPrice === bestExchanges?.[0]?.spot?.askPrice ? 'bg-emerald-500' : 'bg-rose-500',
       'w-full h-full py-2',
     )}>
       <p className='p-2 pb-0 font-bold text-white/80 text-center text-lg'>
@@ -55,15 +73,22 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
           </p>
         </div>
       </div>
+
+      {/* Status */}
+      <p className='p-2 pb-0 font-light text-center text-xs text-white/80 uppercase'>
+        {status}
+      </p>
+
     </div>
   )
 
-  if (currencyId !== 'btc' && currencyId !== 'eth')
+  // Handle unsupported currencies
+  if (currencyId.toLowerCase() !== 'btc' && currencyId.toLowerCase() !== 'eth')
   {
     return (
       <div className='p-6 w-full h-full max-w-xl mx-auto flex flex-col space-y-6'>
         <p className='font-semibold text-2xl text-rose-400 text-center'>
-          {currencyId.toUpperCase()} is not supported.
+          {currencyId.toUpperCase()} currency is not supported. Use either BTC or ETH.
         </p>
       </div>
     )
@@ -80,22 +105,18 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
           {`${currencyId}`.toUpperCase()}
         </span>
       </p>
-      <p className='font-bold text-4xl text-white/80 text-center'>
-        on <span className='text-emerald-400'>{results.bestExchange.exchange}</span>
-      </p>
+      {
+        bestExchangeNames !== ''
+        && <p className='font-bold text-4xl text-white/80 text-center'>
+          on <span className='text-emerald-400'>{bestExchangeNames}</span>
+        </p>
+      }
     </div>
 
     <div className='grid grid-cols-2 gap-1 w-full'>
-      {results.prices.map(showPrice)}
+      {showPrice(binanceSocket.spot, binanceSocket.status)}
+      {showPrice(bybitSocket.spot, bybitSocket.status)}
     </div>
-
-    <p className='text-center'>
-      {
-        secondsUntilUpdate > 0
-          ? <span className='text-white/50'>Updating in {secondsUntilUpdate}s</span>
-          : <span className='text-emerald-400 flex items-center justify-center space-x-1'><FaSpinner className='animate-spin' /> <span>Updating prices ...</span></span>
-      }
-    </p>
 
     <div className='pt-16 text-center'>
       <Link
