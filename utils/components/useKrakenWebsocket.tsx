@@ -34,6 +34,7 @@ export default function useKrakenWebsocket({ currencyToBuy }: Props)
         })
 
         const socket = new WebSocket('wss://ws.kraken.com')
+        const topic = `${currencyToBuy.toUpperCase()}/USDT`
 
         // Open
         socket.addEventListener('open', () =>
@@ -46,7 +47,7 @@ export default function useKrakenWebsocket({ currencyToBuy }: Props)
 
             socket.send(JSON.stringify({
                 event: 'subscribe',
-                pair: [`${currencyToBuy.toUpperCase()}/USDT`],
+                pair: [topic],
                 subscription: {
                     name: 'ticker'
                 }
@@ -58,7 +59,7 @@ export default function useKrakenWebsocket({ currencyToBuy }: Props)
         {
             const tickerData = JSON.parse(event.data)
 
-            if (tickerData[2] === 'ticker' && tickerData[3] === currencyToBuy.toUpperCase() + '/USDT')
+            if (tickerData[2] === 'ticker' && tickerData[3] === topic)
             {
                 bidPriceRef.current = parseFloat(tickerData[1].b[0])
                 askPriceRef.current = parseFloat(tickerData[1].a[0])

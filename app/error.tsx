@@ -20,7 +20,7 @@ export default function Error({ error, reset }: Props)
                     Whoops!
                 </h1>
                 <h2 className='mt-2 font-medium text-lg text-center text-teal-100'>
-                    An error has occured.
+                    {error.message}
                 </h2>
             </div>
 

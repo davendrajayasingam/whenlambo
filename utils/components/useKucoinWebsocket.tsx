@@ -68,7 +68,7 @@ export default function useKucoinWebsocket({ currencyToBuy }: Props)
         const topic = `/market/ticker:${currencyToBuy.toUpperCase()}-USDT`
 
         // Open
-        socket.addEventListener('open', data =>
+        socket.addEventListener('open', () =>
         {
             statusRef.current = 'established'
             setSocketData({
@@ -81,7 +81,7 @@ export default function useKucoinWebsocket({ currencyToBuy }: Props)
                 type: 'subscribe',
                 topic, //Topic needs to be subscribed. Some topics support to divisional subscribe the informations of multiple trading pairs through ",".
                 privateChannel: false, //Adopted the private channel or not. Set as false by default.
-                response: true //Whether the server needs to return the receipt information of this subscription or not. Set as false by default.
+                response: false //Whether the server needs to return the receipt information of this subscription or not. Set as false by default.
             }))
 
             heartbeatInterval = setInterval(() => socket.send(JSON.stringify({
@@ -110,10 +110,6 @@ export default function useKucoinWebsocket({ currencyToBuy }: Props)
                     status: statusRef.current
                 })
             }
-            else
-            {
-                console.log(tickerData)
-            }
         })
 
         // Error
@@ -136,7 +132,14 @@ export default function useKucoinWebsocket({ currencyToBuy }: Props)
             })
         })
 
-        return () => socket.close()
+        return () =>
+        {
+            socket.close()
+            if (heartbeatInterval)
+            {
+                clearInterval(heartbeatInterval)
+            }
+        }
     }, [connectionDetails])
 
 

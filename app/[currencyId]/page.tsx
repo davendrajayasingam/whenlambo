@@ -36,8 +36,6 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
   const cheapestExchanges = getCheapestExchanges()
   const cheapestExchangeNames = cheapestExchanges.map(socket => socket.spot.exchange).join(', or ')
 
-  // const results = usePriceFetcher({ currencyToBuy: currencyId })
-
   const currencyFormatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: 'USD',
@@ -126,7 +124,7 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
     </div>
 
     <div className='pt-16 text-center'>
-      <Link
+      <a
         href={`/${currencyId === 'btc' ? 'eth' : 'btc'}`}
         className={classNames(
           currencyId === 'btc' ? 'bg-ethereum' : 'bg-bitcoin',
@@ -134,7 +132,7 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
         )}
       >
         Buy {currencyId === 'btc' ? 'ETH' : 'BTC'} instead
-      </Link>
+      </a>
     </div>
 
   </div>
