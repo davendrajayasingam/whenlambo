@@ -59,7 +59,7 @@ export default function useKrakenWebsocket({ currencyToBuy }: Props)
         {
             const tickerData = JSON.parse(event.data)
 
-            if (tickerData[2] === 'ticker' && tickerData[3] === topic)
+            if (tickerData[2] === 'ticker')
             {
                 bidPriceRef.current = parseFloat(tickerData[1].b[0])
                 askPriceRef.current = parseFloat(tickerData[1].a[0])

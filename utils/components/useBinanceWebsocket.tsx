@@ -86,12 +86,8 @@ export default function useBinanceWebsocket({ currencyToBuy }: Props)
 
         socket.addEventListener('ping', data =>
         {
-            console.log('Received data from Binance:', data)
-
-            // Check if the received message is a Ping from Binance
             if (data.toString() === 'ping')
             {
-                console.log('Received Ping from Binance. Sending Pong.')
                 socket.send('pong')
             }
         })
