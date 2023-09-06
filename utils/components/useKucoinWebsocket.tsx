@@ -9,7 +9,7 @@ export default function useKucoinWebsocket({ currencyToBuy }: Props)
 {
     const bidPriceRef = useRef<number>(0)
     const askPriceRef = useRef<number>(0)
-    const statusRef = useRef<ConnectionStatus>('disconnected')
+    const statusRef = useRef<ConnectionStatus>('initializing ...')
 
     const getRandomNumber = () => Math.floor(Math.random() * 1000000000)
     const connectionIdRef = useRef<number>(getRandomNumber())
@@ -57,18 +57,10 @@ export default function useKucoinWebsocket({ currencyToBuy }: Props)
         }
 
         let heartbeatInterval: NodeJS.Timeout
-
-        statusRef.current = 'connecting ...'
-        setSocketData({
-            ...socketData,
-            status: statusRef.current
-        })
-
-        const socket = new WebSocket(`${connectionDetails.endpoint}?token=${connectionDetails.token}`)
+        let socket: WebSocket
         const topic = `/market/ticker:${currencyToBuy.toUpperCase()}-USDT`
 
-        // Open
-        socket.addEventListener('open', () =>
+        const socketOpenListener = () =>
         {
             statusRef.current = 'established'
             setSocketData({
@@ -88,10 +80,9 @@ export default function useKucoinWebsocket({ currencyToBuy }: Props)
                 id: connectionIdRef.current,
                 type: 'ping'
             })), connectionDetails.pingInterval)
-        })
+        }
 
-        // Message
-        socket.addEventListener('message', event =>
+        const socketMessageListener = (event: MessageEvent) =>
         {
             const tickerData = JSON.parse(event.data)
 
@@ -110,35 +101,42 @@ export default function useKucoinWebsocket({ currencyToBuy }: Props)
                     status: statusRef.current
                 })
             }
-        })
+        }
 
-        // Error
-        socket.addEventListener('error', () =>
+        const socketErrorListener = () =>
         {
             statusRef.current = 'error'
             setSocketData({
                 ...socketData,
                 status: statusRef.current
             })
-        })
+        }
 
-        // Handle WebSocket close event
-        socket.addEventListener('close', () => 
+        const socketCloseListener = () =>
         {
-            statusRef.current = 'disconnected'
+            statusRef.current = 'connecting ...'
             setSocketData({
                 ...socketData,
                 status: statusRef.current
             })
-        })
+
+            // reopens the socket in case of disconnection
+            socket = new WebSocket(`${connectionDetails.endpoint}?token=${connectionDetails.token}`)
+            socket.addEventListener('open', socketOpenListener)
+            socket.addEventListener('message', socketMessageListener)
+            socket.addEventListener('error', socketErrorListener)
+            socket.addEventListener('close', socketCloseListener)
+        }
+
+        socketCloseListener()
 
         return () =>
         {
-            socket.close()
             if (heartbeatInterval)
             {
                 clearInterval(heartbeatInterval)
             }
+            socket.close()
         }
     }, [connectionDetails])
 

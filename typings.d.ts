@@ -5,7 +5,7 @@ type SpotPrice = {
     askPrice: number
 }
 
-type ConnectionStatus = 'connecting ...' | 'established' | 'connected' | 'disconnected' | 'error'
+type ConnectionStatus = 'connecting ...' | 'established' | 'connected' | 'initializing ...' | 'error'
 
 type SocketData = {
     spot: SpotPrice,

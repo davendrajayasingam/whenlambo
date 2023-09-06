@@ -8,7 +8,7 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
 {
     const bidPriceRef = useRef<number>(0)
     const askPriceRef = useRef<number>(0)
-    const statusRef = useRef<ConnectionStatus>('connecting ...')
+    const statusRef = useRef<ConnectionStatus>('initializing ...')
 
     const [socketData, setSocketData] = useState<SocketData>({
         spot: {

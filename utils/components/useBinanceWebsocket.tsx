@@ -8,7 +8,7 @@ export default function useBinanceWebsocket({ currencyToBuy }: Props)
 {
     const bidPriceRef = useRef<number>(0)
     const askPriceRef = useRef<number>(0)
-    const statusRef = useRef<ConnectionStatus>('disconnected')
+    const statusRef = useRef<ConnectionStatus>('initializing ...')
 
     const [socketData, setSocketData] = useState<SocketData>({
         spot: {
@@ -27,26 +27,18 @@ export default function useBinanceWebsocket({ currencyToBuy }: Props)
             return
         }
 
-        statusRef.current = 'connecting ...'
-        setSocketData({
-            ...socketData,
-            status: statusRef.current
-        })
+        let socket: WebSocket
 
-        const socket = new WebSocket(`wss://data-stream.binance.vision/ws/${currencyToBuy.toLowerCase()}usdt@bookTicker`)
-
-        // Open
-        socket.addEventListener('open', () =>
+        const socketOpenListener = () =>
         {
             statusRef.current = 'established'
             setSocketData({
                 ...socketData,
                 status: statusRef.current
             })
-        })
+        }
 
-        // Message
-        socket.addEventListener('message', event =>
+        const socketMessageListener = (event: MessageEvent) =>
         {
             const tickerData = JSON.parse(event.data)
 
@@ -62,35 +54,43 @@ export default function useBinanceWebsocket({ currencyToBuy }: Props)
                 },
                 status: statusRef.current
             })
-        })
+        }
 
-        // Error
-        socket.addEventListener('error', () =>
+        const socketErrorListener = () =>
         {
             statusRef.current = 'error'
             setSocketData({
                 ...socketData,
                 status: statusRef.current
             })
-        })
+        }
 
-        // Handle WebSocket close event
-        socket.addEventListener('close', () => 
-        {
-            statusRef.current = 'disconnected'
-            setSocketData({
-                ...socketData,
-                status: statusRef.current
-            })
-        })
-
-        socket.addEventListener('ping', data =>
+        const socketPingListener = (data: Event) =>
         {
             if (data.toString() === 'ping')
             {
                 socket.send('pong')
             }
-        })
+        }
+
+        const socketCloseListener = () =>
+        {
+            statusRef.current = 'connecting ...'
+            setSocketData({
+                ...socketData,
+                status: statusRef.current
+            })
+
+            // reopens the socket in case of disconnection
+            socket = new WebSocket(`wss://data-stream.binance.vision/ws/${currencyToBuy.toLowerCase()}usdt@bookTicker`)
+            socket.addEventListener('open', socketOpenListener)
+            socket.addEventListener('message', socketMessageListener)
+            socket.addEventListener('error', socketErrorListener)
+            socket.addEventListener('close', socketCloseListener)
+            socket.addEventListener('ping', socketPingListener)
+        }
+
+        socketCloseListener()
 
         return () => socket.close()
     }, [currencyToBuy])
