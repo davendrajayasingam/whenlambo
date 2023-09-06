@@ -5,17 +5,21 @@ import Link from 'next/link'
 import { classNames } from '@/utils/helpers/tailwindHelper'
 import useBinanceWebsocket from '@/utils/components/useBinanceWebsocket'
 import useBybitWebsocket from '@/utils/components/useBybitWebsocket'
+import useKrakenWebsocket from '@/utils/components/useKrakenWebsocket'
 
 export default function BTCPage({ params }: { params: { currencyId: string } }) 
 {
   const { currencyId } = params
 
-  const binanceSocket: SocketData = useBinanceWebsocket({ currencyToBuy: currencyId })
-  const bybitSocket: SocketData = useBybitWebsocket({ currencyToBuy: currencyId })
+  const sockets = [
+    useBinanceWebsocket({ currencyToBuy: currencyId }),
+    useBybitWebsocket({ currencyToBuy: currencyId }),
+    useKrakenWebsocket({ currencyToBuy: currencyId })
+  ]
 
   const getCheapestExchanges = (): SocketData[] =>
   {
-    const exchanges = [binanceSocket, bybitSocket]
+    const exchanges = sockets
       .filter(socket => socket.status === 'connected')
       .filter(socket => socket.spot.askPrice !== 0)
 
@@ -113,8 +117,7 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
     </div>
 
     <div className='grid grid-cols-2 gap-1 w-full'>
-      {showPrice(binanceSocket.spot, binanceSocket.status)}
-      {showPrice(bybitSocket.spot, bybitSocket.status)}
+      {sockets.map(socket => showPrice(socket.spot, socket.status))}
     </div>
 
     <div className='pt-16 text-center'>

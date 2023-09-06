@@ -73,7 +73,7 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
         })
 
         // Error
-        socket.addEventListener('error', (error) =>
+        socket.addEventListener('error', () =>
         {
             statusRef.current = 'error'
             setSocketData({

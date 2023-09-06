@@ -4,7 +4,7 @@ type Props = {
     currencyToBuy: string
 }
 
-export default function useBinanceWebsocket({ currencyToBuy }: Props)
+export default function useKrakenWebsocket({ currencyToBuy }: Props)
 {
     const bidPriceRef = useRef<number>(0)
     const askPriceRef = useRef<number>(0)
@@ -12,7 +12,7 @@ export default function useBinanceWebsocket({ currencyToBuy }: Props)
 
     const [socketData, setSocketData] = useState<SocketData>({
         spot: {
-            exchange: 'Binance',
+            exchange: 'Kraken',
             currency: currencyToBuy,
             bidPrice: bidPriceRef.current,
             askPrice: askPriceRef.current
@@ -28,7 +28,7 @@ export default function useBinanceWebsocket({ currencyToBuy }: Props)
             status: statusRef.current
         })
 
-        const socket = new WebSocket(`wss://data-stream.binance.vision/ws/${currencyToBuy.toLowerCase()}usdt@bookTicker`)
+        const socket = new WebSocket('wss://ws.kraken.com')
 
         // Open
         socket.addEventListener('open', () =>
@@ -38,6 +38,14 @@ export default function useBinanceWebsocket({ currencyToBuy }: Props)
                 ...socketData,
                 status: statusRef.current
             })
+
+            socket.send(JSON.stringify({
+                event: 'subscribe',
+                pair: [`${currencyToBuy.toUpperCase()}/USDT`],
+                subscription: {
+                    name: 'ticker'
+                }
+            }))
         })
 
         // Message
@@ -45,18 +53,22 @@ export default function useBinanceWebsocket({ currencyToBuy }: Props)
         {
             const tickerData = JSON.parse(event.data)
 
-            bidPriceRef.current = parseFloat(tickerData.b)
-            askPriceRef.current = parseFloat(tickerData.a)
-            statusRef.current = 'connected'
+            console.log('tickerData', tickerData)
+            if (tickerData[2] === 'ticker' && tickerData[3] === currencyToBuy.toUpperCase() + '/USDT')
+            {
+                bidPriceRef.current = parseFloat(tickerData[1].b[0])
+                askPriceRef.current = parseFloat(tickerData[1].a[0])
+                statusRef.current = 'connected'
 
-            setSocketData({
-                spot: {
-                    ...socketData.spot,
-                    bidPrice: bidPriceRef.current,
-                    askPrice: askPriceRef.current
-                },
-                status: statusRef.current
-            })
+                setSocketData({
+                    spot: {
+                        ...socketData.spot,
+                        bidPrice: bidPriceRef.current,
+                        askPrice: askPriceRef.current
+                    },
+                    status: statusRef.current
+                })
+            }
         })
 
         // Error
@@ -77,18 +89,6 @@ export default function useBinanceWebsocket({ currencyToBuy }: Props)
                 ...socketData,
                 status: statusRef.current
             })
-        })
-
-        socket.addEventListener('ping', data =>
-        {
-            console.log('Received data from Binance:', data)
-
-            // Check if the received message is a Ping from Binance
-            if (data.toString() === 'ping')
-            {
-                console.log('Received Ping from Binance. Sending Pong.')
-                socket.send('pong')
-            }
         })
 
         return () => socket.close()
