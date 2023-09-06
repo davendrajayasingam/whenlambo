@@ -53,8 +53,8 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
 
             if (tickerData.topic === topic)
             {
-                bidPriceRef.current |= parseFloat(tickerData.data.b?.[0]?.[0] || 0)
-                askPriceRef.current |= parseFloat(tickerData.data.a?.[0]?.[0] || 0)
+                bidPriceRef.current = parseFloat(tickerData.data.b?.[0]?.[0] || 0) || bidPriceRef.current
+                askPriceRef.current = parseFloat(tickerData.data.a?.[0]?.[0] || 0) || askPriceRef.current
                 statusRef.current = 'connected'
 
                 setSocketData({

@@ -42,8 +42,8 @@ export default function useBinanceWebsocket({ currencyToBuy }: Props)
         {
             const tickerData = JSON.parse(event.data)
 
-            bidPriceRef.current = parseFloat(tickerData.b)
-            askPriceRef.current = parseFloat(tickerData.a)
+            bidPriceRef.current = parseFloat(tickerData.b) || bidPriceRef.current
+            askPriceRef.current = parseFloat(tickerData.a) || askPriceRef.current
             statusRef.current = 'connected'
 
             setSocketData({

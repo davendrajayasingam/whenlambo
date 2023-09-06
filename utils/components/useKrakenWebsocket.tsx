@@ -53,8 +53,8 @@ export default function useKrakenWebsocket({ currencyToBuy }: Props)
 
             if (tickerData[2] === 'ticker')
             {
-                bidPriceRef.current = parseFloat(tickerData[1].b[0])
-                askPriceRef.current = parseFloat(tickerData[1].a[0])
+                bidPriceRef.current = parseFloat(tickerData[1].b[0]) || bidPriceRef.current
+                askPriceRef.current = parseFloat(tickerData[1].a[0]) || askPriceRef.current
                 statusRef.current = 'connected'
 
                 setSocketData({
