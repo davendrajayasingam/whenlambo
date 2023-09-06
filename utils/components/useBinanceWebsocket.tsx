@@ -45,8 +45,8 @@ export default function useBinanceWebsocket({ currencyToBuy }: Props)
         {
             const tickerData = JSON.parse(event.data)
 
-            bidPriceRef.current = tickerData.b
-            askPriceRef.current = tickerData.a
+            bidPriceRef.current = parseFloat(tickerData.b)
+            askPriceRef.current = parseFloat(tickerData.a)
             statusRef.current = 'connected'
 
             setSocketData({
@@ -77,6 +77,18 @@ export default function useBinanceWebsocket({ currencyToBuy }: Props)
                 ...socketData,
                 status: statusRef.current
             })
+        })
+
+        socket.addEventListener('ping', data =>
+        {
+            console.log('Received data from Binance:', data)
+
+            // Check if the received message is a Ping from Binance
+            if (data.toString() === 'ping')
+            {
+                console.log('Received Ping from Binance. Sending Pong.')
+                socket.send('pong')
+            }
         })
 
         return () => socket.close()

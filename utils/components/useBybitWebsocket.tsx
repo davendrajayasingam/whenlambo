@@ -22,6 +22,8 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
 
     useEffect(() =>
     {
+        let heartbeatInterval: NodeJS.Timeout
+
         statusRef.current = 'connecting ...'
         setSocketData({
             ...socketData,
@@ -44,6 +46,8 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
                 op: 'subscribe',
                 args: [topic]
             }))
+
+            heartbeatInterval = setInterval(() => socket.send(JSON.stringify({ 'op': 'ping' })), 20000)
         })
 
         // Message
@@ -53,8 +57,8 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
 
             if (tickerData.topic === topic)
             {
-                bidPriceRef.current |= tickerData.data.b?.[0]?.[0]
-                askPriceRef.current |= tickerData.data.a?.[0]?.[0]
+                bidPriceRef.current |= parseFloat(tickerData.data.b?.[0]?.[0] || 0)
+                askPriceRef.current |= parseFloat(tickerData.data.a?.[0]?.[0] || 0)
                 statusRef.current = 'connected'
 
                 setSocketData({
@@ -88,7 +92,14 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
             })
         })
 
-        return () => socket.close()
+        return () =>
+        {
+            socket.close()
+            if (heartbeatInterval)
+            {
+                clearInterval(heartbeatInterval)
+            }
+        }
     }, [currencyToBuy])
 
 

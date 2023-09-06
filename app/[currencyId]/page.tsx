@@ -15,18 +15,17 @@ export default function BTCPage({ params }: { params: { currencyId: string } })
 
   const getBestExchanges = (): SocketData[] =>
   {
-    const lowestAsk = Math.min(
-      binanceSocket.spot.askPrice,
-      bybitSocket.spot.askPrice
-    )
+    const exchanges = [binanceSocket, bybitSocket]
+      .filter(socket => socket.status === 'connected')
+      .filter(socket => socket.spot.askPrice !== 0)
 
+    const lowestAsk = Math.min(...exchanges.map(socket => socket.spot.askPrice))
     if (lowestAsk === 0)
     {
       return []
     }
 
-    return [binanceSocket, bybitSocket]
-      .filter(socket => socket.spot.askPrice === lowestAsk)
+    return exchanges.filter(socket => socket.spot.askPrice === lowestAsk)
   }
   const bestExchanges = getBestExchanges()
   const bestExchangeNames = bestExchanges.map(socket => socket.spot.exchange).join(', or ')
