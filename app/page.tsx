@@ -11,6 +11,7 @@ export default async function HomePage()
       src={introImage}
       alt='When Lambo?'
       className='rounded-lg'
+      placeholder='blur'
     />
 
     <p className='font-semibold text-2xl text-white/80 text-center'>
