@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import useWebSocket from 'react-use-websocket'
 
 type Props = {
     currencyToBuy: string
@@ -19,6 +20,29 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
         },
         status: statusRef.current
     })
+
+    const { sendJsonMessage, lastMessage, readyState } = useWebSocket('wss://stream.bybit.com/v5/public/spot', {
+
+        onOpen: () =>
+        {
+            console.log('bybit onOpen')
+            // send message
+            sendJsonMessage({
+                op: 'subscribe',
+                args: [`orderbook.1.${currencyToBuy.toUpperCase()}USDT`]
+            })
+        },
+        //Will attempt to reconnect on all close events, such as server shutting down
+        shouldReconnect: (closeEvent) => true
+    })
+
+    useEffect(() =>
+    {
+        if (lastMessage !== null)
+        {
+            console.log('bybit lastMessage', lastMessage)
+        }
+    }, [lastMessage])
 
     useEffect(() =>
     {
@@ -86,14 +110,14 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
             })
 
             // reopens the socket in case of disconnection
-            socket = new WebSocket('wss://stream.bybit.com/v5/public/spot?')
+            socket = new WebSocket('wss://stream.bybit.com/v5/public/spot')
             socket.onopen = socketOpenListener
             socket.onmessage = socketMessageListener
             socket.onerror = socketErrorListener
             socket.onclose = socketCloseListener
         }
 
-        socketCloseListener()
+        // socketCloseListener()
 
         return () =>
         {
