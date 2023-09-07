@@ -87,10 +87,10 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
 
             // reopens the socket in case of disconnection
             socket = new WebSocket('wss://stream.bybit.com/v5/public/spot')
-            socket.addEventListener('open', socketOpenListener)
-            socket.addEventListener('message', socketMessageListener)
-            socket.addEventListener('error', socketErrorListener)
-            socket.addEventListener('close', socketCloseListener)
+            socket.onopen = socketOpenListener
+            socket.onmessage = socketMessageListener
+            socket.onerror = socketErrorListener
+            socket.onclose = socketCloseListener
         }
 
         socketCloseListener()
