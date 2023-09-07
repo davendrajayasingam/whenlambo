@@ -87,10 +87,10 @@ export default function useKrakenWebsocket({ currencyToBuy }: Props)
 
             // reopens the socket in case of disconnection
             socket = new WebSocket('wss://ws.kraken.com')
-            socket.addEventListener('open', socketOpenListener)
-            socket.addEventListener('message', socketMessageListener)
-            socket.addEventListener('error', socketErrorListener)
-            socket.addEventListener('close', socketCloseListener)
+            socket.onopen = socketOpenListener
+            socket.onmessage = socketMessageListener
+            socket.onerror = socketErrorListener
+            socket.onclose = socketCloseListener
         }
 
         socketCloseListener()
