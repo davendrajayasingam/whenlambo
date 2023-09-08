@@ -146,6 +146,8 @@ export default function useKucoinWebsocket({ currencyToBuy }: Props)
         }
 
         socketCloseListener()
+
+        return () => socket.close()
     }, [connectionDetails])
 
 
