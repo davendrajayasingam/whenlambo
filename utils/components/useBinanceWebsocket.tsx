@@ -82,6 +82,7 @@ export default function useBinanceWebsocket({ currencyToBuy }: Props)
             })
 
             // reopens the socket in case of disconnection
+            // use vision instead of com because vision works on ios
             socket = new WebSocket(`wss://data-stream.binance.vision/ws/${currencyToBuy.toLowerCase()}usdt@bookTicker`)
             socket.onopen = socketOpenListener
             socket.onmessage = socketMessageListener

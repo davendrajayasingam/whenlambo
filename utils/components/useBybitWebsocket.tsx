@@ -29,7 +29,7 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
 
         let socket: WebSocket
         let heartbeatInterval: NodeJS.Timeout
-        const topic = `bookticker.${currencyToBuy.toUpperCase()}USDT`
+        const topic = `orderbook.1.${currencyToBuy.toUpperCase()}USDT`
 
         const socketOpenListener = () =>
         {
@@ -53,8 +53,8 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
 
             if (tickerData.topic === topic)
             {
-                bidPriceRef.current = parseFloat(tickerData.data.bp || 0) || bidPriceRef.current
-                askPriceRef.current = parseFloat(tickerData.data.ap || 0) || askPriceRef.current
+                bidPriceRef.current = parseFloat(tickerData.data.b?.[0]?.[0] || 0) || bidPriceRef.current
+                askPriceRef.current = parseFloat(tickerData.data.a?.[0]?.[0] || 0) || askPriceRef.current
                 statusRef.current = 'connected'
 
                 setSocketData({
@@ -86,7 +86,9 @@ export default function useBybitWebsocket({ currencyToBuy }: Props)
             })
 
             // reopens the socket in case of disconnection
-            socket = new WebSocket('wss://stream.bytick.com/spot/public/v3')
+            // use bytick instead of bybit because bytick works on ios
+            // ref: https://bybit-exchange.github.io/docs/v3/intro
+            socket = new WebSocket('wss://stream.bytick.com/v5/public/spot')
             socket.onopen = socketOpenListener
             socket.onmessage = socketMessageListener
             socket.onerror = socketErrorListener
