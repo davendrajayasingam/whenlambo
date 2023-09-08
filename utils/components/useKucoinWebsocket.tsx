@@ -131,7 +131,7 @@ export default function useKucoinWebsocket({ currencyToBuy }: Props)
             }
 
             // reopens the socket in case of disconnection
-            socket = new WebSocket(`wss://ws-api-spot.kucoin.com/endpoint/?token=${connectionDetails.token}`)
+            socket = new WebSocket(`${connectionDetails.endpoint}?token=${connectionDetails.token}`)
             socket.onopen = socketOpenListener
             socket.onmessage = socketMessageListener
             socket.onerror = socketErrorListener
