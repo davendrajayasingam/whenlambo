@@ -78,7 +78,7 @@ export default function useKucoinWebsocket({ currencyToBuy }: Props)
                 type: 'subscribe',
                 topic, //Topic needs to be subscribed. Some topics support to divisional subscribe the informations of multiple trading pairs through ",".
                 privateChannel: false, //Adopted the private channel or not. Set as false by default.
-                response: false //Whether the server needs to return the receipt information of this subscription or not. Set as false by default.
+                response: true //Whether the server needs to return the receipt information of this subscription or not. Set as false by default.
             }))
 
             heartbeatInterval = setInterval(() => socket.send(JSON.stringify({
@@ -146,8 +146,6 @@ export default function useKucoinWebsocket({ currencyToBuy }: Props)
         }
 
         socketCloseListener()
-
-        return () => socket.close()
     }, [connectionDetails])
 
 
